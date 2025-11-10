@@ -2,6 +2,7 @@ import os
 from datetime import datetime, timedelta
 from typing import Annotated
 
+from dotenv import load_dotenv
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
@@ -10,6 +11,8 @@ from sqlalchemy.orm import Session
 
 from database import SessionLocal
 from models import User
+
+load_dotenv()
 
 SECRET_KEY = os.getenv("JWT_SECRET_KEY", "change-me")
 ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")

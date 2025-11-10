@@ -1,6 +1,7 @@
 from datetime import timedelta
 from typing import Annotated
 
+from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy.orm import Session
 
@@ -14,6 +15,8 @@ from schemas import UserCreate, UserLogin, UserOut
 ModelsBase.metadata.create_all(bind=engine)
 
 app = FastAPI(title="user_service")
+
+load_dotenv()
 
 
 @app.post("/register")
