@@ -1,7 +1,8 @@
 from sqlalchemy.orm import Session
 
+import schemas
 from auth import get_password_hash, verify_password
-from models import User
+from models import PushToken, User
 from schemas import UserCreate
 
 
@@ -15,6 +16,18 @@ def get_user(db: Session, user_id: int):
 
 def get_users(db: Session):
     return db.query(User).all()
+
+
+def add_push_token(db: Session, user_id: str, token_data: schemas.PushTokenData):
+    db_token = PushToken(user_id=user_id, token=token_data.token)
+    db.add(db_token)
+    db.commit()
+    db.refresh(db_token)
+    return db_token
+
+
+def get_user_push_tokens(db: Session, user_id: int):
+    return db.query(PushToken).filter(PushToken.user_id == user_id).first()
 
 
 def update_user(db: Session, user_id: int, updates: UserCreate):

@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from database import engine
 from models import Base as ModelsBase
-from routers import users  # import the users router
+from routers import users
 
 load_dotenv()
 ModelsBase.metadata.create_all(bind=engine)

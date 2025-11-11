@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 import crud
+import schemas
 from auth import create_access_token, get_current_user, get_db
 from models import User
 from schemas import UserCreate, UserLogin, UserOut
@@ -59,6 +60,45 @@ def get_user_by_id(user_id: str, db: Annotated[Session, Depends(get_db)]):
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
         )
     return user
+
+
+@router.get("/{user_id}/push-token", response_model=schemas.PushTokenOut)
+def get_user_tokens(
+    user_id: str,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    if str(current_user.id) != user_id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    token = crud.get_user_push_tokens(db, user_id)
+    if not token:
+        raise HTTPException(
+            status_code=404, detail="No push tokens found for this user"
+        )
+    return token
+
+
+@router.post("/{user_id}/push-tokens")
+def register_push_token(
+    token_data: schemas.PushTokenData,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    user_id = token_data.user_id
+    if current_user.id != user_id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    existing = crud.get_push_token_by_user(db, user_id)
+    if existing:
+        # Update existing token
+        existing.token = token_data.token
+        db.commit()
+        db.refresh(existing)
+        return existing
+
+    # Create new one
+    return crud.create_push_token(db, user_id, token_data)
 
 
 @router.patch("/{user_id}", response_model=UserOut)
