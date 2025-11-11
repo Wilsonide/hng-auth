@@ -49,6 +49,7 @@ def login(form_data: UserLogin, db: Annotated[Session, Depends(get_db)]):
     access_token_expires = timedelta(minutes=60)
     access_token = create_access_token(
         subject=user.email,
+        user_id=str(user.id),
         expires_delta=access_token_expires,
     )
     return {"access_token": access_token, "token_type": "bearer"}
