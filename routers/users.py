@@ -1,7 +1,7 @@
 from datetime import timedelta
-from typing import Annotated
+from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 import crud
@@ -50,8 +50,29 @@ def list_users(db: Annotated[Session, Depends(get_db)]):
     return crud.get_users(db)
 
 
-@router.put("/{user_id}", response_model=UserOut)
+@router.get("/{user_id}", response_model=UserOut)
+def get_user_by_id(user_id: int, db: Annotated[Session, Depends(get_db)]):
+    """Retrieve a single user by ID."""
+    user = crud.get_user(db, user_id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
+    return user
+
+
+@router.patch("/{user_id}", response_model=UserOut)
 def update_user(
-    user_id: int, user_update: UserCreate, db: Annotated[Session, Depends(get_db)]
+    user_id: str,
+    updates: UserCreate,  # ✅ Accept any dict of fields
+    db: Annotated[Session, Depends(get_db)],
 ):
-    pass  # To be implemented later
+    """Dynamically update only the provided fields of a user."""
+    user = crud.get_user(db, user_id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
+
+    updated_user = crud.update_user(db, user_id, updates)
+    return updated_user

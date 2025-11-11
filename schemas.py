@@ -1,3 +1,5 @@
+from typing import Any
+
 from pydantic import BaseModel, EmailStr
 
 
@@ -12,6 +14,7 @@ class UserOut(BaseModel):
     push_token: str | None = None
     password: str | None = None
     preferences: UserPreferences
+    id: Any
 
     class Config:
         orm_mode = True
