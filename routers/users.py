@@ -51,7 +51,7 @@ def list_users(db: Annotated[Session, Depends(get_db)]):
 
 
 @router.get("/{user_id}", response_model=UserOut)
-def get_user_by_id(user_id: int, db: Annotated[Session, Depends(get_db)]):
+def get_user_by_id(user_id: str, db: Annotated[Session, Depends(get_db)]):
     """Retrieve a single user by ID."""
     user = crud.get_user(db, user_id)
     if not user:
