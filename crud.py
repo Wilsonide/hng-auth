@@ -19,6 +19,9 @@ def get_users(db: Session):
 
 
 def add_push_token(db: Session, user_id: str, token_data: schemas.PushTokenData):
+    existing_token = db.query(PushToken).filter_by(token=token_data.token).first()
+    if existing_token:
+        return existing_token
     db_token = PushToken(user_id=user_id, token=token_data.token)
     db.add(db_token)
     db.commit()
