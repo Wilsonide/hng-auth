@@ -1,3 +1,4 @@
+from datetime import datetime
 from uuid import UUID
 
 from pydantic import BaseModel, EmailStr
@@ -9,10 +10,10 @@ class UserPreferences(BaseModel):
 
 
 class PushTokenOut(BaseModel):
-    id: str
-    user_id: str
+    id: UUID
+    user_id: UUID
     token: str
-    created_at: str
+    created_at: datetime
 
     class Config:
         orm_mode = True
@@ -31,7 +32,6 @@ class UserOut(BaseModel):
 
 
 class PushTokenData(BaseModel):
-    user_id: str
     token: str
 
 

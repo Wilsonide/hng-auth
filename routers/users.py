@@ -1,5 +1,5 @@
 from datetime import timedelta
-from typing import Annotated, Any
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -66,9 +66,9 @@ def get_user_by_id(user_id: str, db: Annotated[Session, Depends(get_db)]):
 def get_user_tokens(
     user_id: str,
     db: Annotated[Session, Depends(get_db)],
-    current_user: Annotated[User, Depends(get_current_user)],
 ):
-    if str(current_user.id) != user_id:
+    current_user = crud.get_user(db, user_id)
+    if not current_user:
         raise HTTPException(status_code=403, detail="Not authorized")
 
     token = crud.get_user_push_tokens(db, user_id)
@@ -79,17 +79,18 @@ def get_user_tokens(
     return token
 
 
-@router.post("/{user_id}/push-tokens")
+@router.post("/{user_id}/push-token", response_model=schemas.PushTokenOut)
 def register_push_token(
+    user_id: str,
     token_data: schemas.PushTokenData,
     db: Annotated[Session, Depends(get_db)],
-    current_user: Annotated[User, Depends(get_current_user)],
 ):
-    user_id = token_data.user_id
-    if current_user.id != user_id:
+    current_user = crud.get_user(db, user_id)
+
+    if not current_user:
         raise HTTPException(status_code=403, detail="Not authorized")
 
-    existing = crud.get_push_token_by_user(db, user_id)
+    existing = crud.get_user_push_tokens(db, user_id)
     if existing:
         # Update existing token
         existing.token = token_data.token
@@ -98,7 +99,7 @@ def register_push_token(
         return existing
 
     # Create new one
-    return crud.create_push_token(db, user_id, token_data)
+    return crud.add_push_token(db, user_id, token_data)
 
 
 @router.patch("/{user_id}", response_model=UserOut)
