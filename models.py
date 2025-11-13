@@ -34,7 +34,7 @@ class User(Base):
 
 
 class PushToken(Base):
-    __tablename__ = "push_tokens"
+    __tablename__ = "push_token"
     id = Column(
         UUID(as_uuid=True),
         primary_key=True,
@@ -44,7 +44,7 @@ class PushToken(Base):
         nullable=False,
     )
     user_id = Column(UUID, ForeignKey("users.id", ondelete="CASCADE"))
-    token = Column(String, unique=True, index=True)
+    token = Column(String)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     user = relationship("User", back_populates="push_token")
